@@ -1,0 +1,210 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────
+
+enum Plan {
+  free
+  pro
+}
+
+enum LeadOrigin {
+  indicacao
+  instagram
+  facebook
+  whatsapp
+  site
+  telefone
+  outro
+}
+
+enum FunnelStage {
+  novo
+  contatado
+  negociando
+  fechado
+  perdido
+}
+
+enum AppointmentType {
+  ligacao
+  visita
+  reuniao
+  retorno
+  outro
+}
+
+enum TransactionType {
+  entrada
+  saida
+}
+
+// ─── User ────────────────────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  plan      Plan     @default(free)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  leads              Lead[]
+  appointments       Appointment[]
+  catalogCategories  CatalogCategory[]
+  catalogProducts    CatalogProduct[]
+  financeCategories  FinanceCategory[]
+  transactions       Transaction[]
+  refreshTokens      RefreshToken[]
+
+  @@map("users")
+}
+
+// ─── RefreshToken ────────────────────────────────────────────────────
+
+model RefreshToken {
+  id         String    @id @default(uuid())
+  userId     String    @map("user_id")
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token      String    @unique
+  deviceName String?   @map("device_name")
+  expiresAt  DateTime  @map("expires_at")
+  revokedAt  DateTime? @map("revoked_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// ─── Lead ────────────────────────────────────────────────────────────
+
+model Lead {
+  id             String       @id @default(uuid())
+  userId         String       @map("user_id")
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  phone          String
+  cpfCnpj        String?      @map("cpf_cnpj")
+  email          String?
+  origin         LeadOrigin   @default(outro)
+  location       String?
+  observations   String?
+  recurringSale  Boolean      @default(false) @map("recurring_sale")
+  funnelStage    FunnelStage  @default(novo) @map("funnel_stage")
+  dealValue      Decimal?     @map("deal_value") @db.Decimal(10, 2)
+  lostReason     String?      @map("lost_reason")
+  deletedAt      DateTime?    @map("deleted_at")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  appointments   Appointment[]
+  leadProducts   LeadProduct[]
+
+  @@map("leads")
+}
+
+// ─── Appointment ─────────────────────────────────────────────────────
+
+model Appointment {
+  id          String          @id @default(uuid())
+  userId      String          @map("user_id")
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leadId      String?         @map("lead_id")
+  lead        Lead?           @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  title       String
+  description String?
+  type        AppointmentType @default(outro)
+  date        DateTime        @db.Date
+  startTime   String?         @map("start_time")
+  endTime     String?         @map("end_time")
+  allDay      Boolean         @default(false) @map("all_day")
+  color       String?
+  completed   Boolean         @default(false)
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+
+  @@map("appointments")
+}
+
+// ─── Catalog ─────────────────────────────────────────────────────────
+
+model CatalogCategory {
+  id        String          @id @default(uuid())
+  userId    String          @map("user_id")
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  createdAt DateTime        @default(now()) @map("created_at")
+  products  CatalogProduct[]
+
+  @@map("catalog_categories")
+}
+
+model CatalogProduct {
+  id           String          @id @default(uuid())
+  userId       String          @map("user_id")
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId   String          @map("category_id")
+  category     CatalogCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name         String
+  price        Decimal         @db.Decimal(10, 2)
+  durationDays Int?            @map("duration_days")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+
+  leadProducts LeadProduct[]
+
+  @@map("catalog_products")
+}
+
+model LeadProduct {
+  id        String         @id @default(uuid())
+  leadId    String         @map("lead_id")
+  lead      Lead           @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  productId String         @map("product_id")
+  product   CatalogProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  startDate DateTime       @map("start_date") @db.Date
+  expiresAt DateTime?      @map("expires_at") @db.Date
+  createdAt DateTime       @default(now()) @map("created_at")
+
+  @@map("lead_products")
+}
+
+// ─── Finance ─────────────────────────────────────────────────────────
+
+model FinanceCategory {
+  id           String          @id @default(uuid())
+  userId       String          @map("user_id")
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  type         TransactionType
+  color        String?
+  createdAt    DateTime        @default(now()) @map("created_at")
+  transactions Transaction[]
+
+  @@map("finance_categories")
+}
+
+model Transaction {
+  id          String          @id @default(uuid())
+  userId      String          @map("user_id")
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId  String          @map("category_id")
+  category    FinanceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  type        TransactionType
+  amount      Decimal         @db.Decimal(10, 2)
+  description String?
+  date        DateTime        @db.Date
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  @@map("transactions")
+}
