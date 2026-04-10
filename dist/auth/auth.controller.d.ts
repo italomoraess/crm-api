@@ -8,20 +8,12 @@ export declare class AuthController {
     register(dto: RegisterDto): Promise<{
         accessToken: string;
         refreshToken: string;
-        user: {
-            id: string;
-            email: string;
-            name: string | null;
-        };
+        user: import("../billing/subscription.service").UserSubscriptionProfile;
     }>;
     login(dto: LoginDto): Promise<{
         accessToken: string;
         refreshToken: string;
-        user: {
-            id: string;
-            email: string;
-            name: string | null;
-        };
+        user: import("../billing/subscription.service").UserSubscriptionProfile;
     }>;
     refresh(dto: RefreshTokenDto): Promise<{
         accessToken: string;
@@ -39,11 +31,5 @@ export declare class AuthController {
     }>;
     me(user: {
         userId: string;
-    }): Promise<{
-        email: string;
-        name: string | null;
-        id: string;
-        plan: import("@prisma/client").$Enums.Plan;
-        createdAt: Date;
-    } | null>;
+    }): Promise<import("../billing/subscription.service").UserSubscriptionProfile>;
 }

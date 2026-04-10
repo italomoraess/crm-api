@@ -15,13 +15,16 @@ const auth_service_1 = require("./auth.service");
 const auth_controller_1 = require("./auth.controller");
 const jwt_strategy_1 = require("./strategies/jwt.strategy");
 const jwt_auth_guard_1 = require("./guards/jwt-auth.guard");
+const subscription_guard_1 = require("../billing/subscription.guard");
 const core_1 = require("@nestjs/core");
+const billing_module_1 = require("../billing/billing.module");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            billing_module_1.BillingModule,
             passport_1.PassportModule.register({ defaultStrategy: 'jwt' }),
             jwt_1.JwtModule.registerAsync({
                 imports: [config_1.ConfigModule],
@@ -41,6 +44,10 @@ exports.AuthModule = AuthModule = __decorate([
             {
                 provide: core_1.APP_GUARD,
                 useClass: jwt_auth_guard_1.JwtAuthGuard,
+            },
+            {
+                provide: core_1.APP_GUARD,
+                useClass: subscription_guard_1.SubscriptionGuard,
             },
         ],
         exports: [auth_service_1.AuthService],

@@ -7,6 +7,7 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { Public } from '../common/decorators/public.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { SkipSubscription } from '../billing/decorators/skip-subscription.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -39,6 +40,7 @@ export class AuthController {
   }
 
   @ApiBearerAuth()
+  @SkipSubscription()
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Logout current device (revokes refresh token)' })
@@ -51,6 +53,7 @@ export class AuthController {
   }
 
   @ApiBearerAuth()
+  @SkipSubscription()
   @Post('logout-all')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Logout all devices (revokes all refresh tokens)' })
@@ -60,6 +63,7 @@ export class AuthController {
   }
 
   @ApiBearerAuth()
+  @SkipSubscription()
   @Get('me')
   @ApiOperation({ summary: 'Get current user profile' })
   async me(@CurrentUser() user: { userId: string }) {

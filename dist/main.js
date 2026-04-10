@@ -12,7 +12,7 @@ const app_module_1 = require("./app.module");
 const http_exception_filter_1 = require("./common/filters/http-exception.filter");
 const response_interceptor_1 = require("./common/interceptors/response.interceptor");
 async function bootstrap() {
-    const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    const app = await core_1.NestFactory.create(app_module_1.AppModule, { rawBody: true });
     const configService = app.get(config_1.ConfigService);
     app.use((0, helmet_1.default)());
     app.enableCors();

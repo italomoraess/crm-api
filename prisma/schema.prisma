@@ -52,13 +52,17 @@ enum TransactionType {
 // ─── User ────────────────────────────────────────────────────────────
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String?
-  plan      Plan     @default(free)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id                       String    @id @default(uuid())
+  email                    String    @unique
+  password                 String
+  name                     String?
+  plan                     Plan      @default(free)
+  trialEndsAt              DateTime  @map("trial_ends_at")
+  stripeCustomerId         String?   @map("stripe_customer_id")
+  stripeSubscriptionId     String?   @map("stripe_subscription_id")
+  stripeSubscriptionStatus String?   @map("stripe_subscription_status")
+  createdAt                DateTime  @default(now()) @map("created_at")
+  updatedAt                DateTime  @updatedAt @map("updated_at")
 
   leads              Lead[]
   appointments       Appointment[]

@@ -49,14 +49,17 @@ const config_1 = require("@nestjs/config");
 const bcrypt = __importStar(require("bcrypt"));
 const crypto_1 = require("crypto");
 const prisma_service_1 = require("../prisma/prisma.service");
+const subscription_service_1 = require("../billing/subscription.service");
 let AuthService = class AuthService {
     prisma;
     jwtService;
     configService;
-    constructor(prisma, jwtService, configService) {
+    subscriptionService;
+    constructor(prisma, jwtService, configService, subscriptionService) {
         this.prisma = prisma;
         this.jwtService = jwtService;
         this.configService = configService;
+        this.subscriptionService = subscriptionService;
     }
     async register(dto) {
         const existing = await this.prisma.user.findUnique({
@@ -66,19 +69,22 @@ let AuthService = class AuthService {
             throw new common_1.ConflictException('Email already registered');
         }
         const hashedPassword = await bcrypt.hash(dto.password, 12);
+        const trialEndsAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
         const user = await this.prisma.user.create({
             data: {
                 email: dto.email,
                 password: hashedPassword,
                 name: dto.name,
+                trialEndsAt,
             },
         });
         const accessToken = this.generateAccessToken(user);
         const refreshToken = await this.generateRefreshToken(user.id);
+        const profile = await this.subscriptionService.getProfilePayload(user.id);
         return {
             accessToken,
             refreshToken,
-            user: { id: user.id, email: user.email, name: user.name },
+            user: profile,
         };
     }
     async login(dto) {
@@ -94,10 +100,11 @@ let AuthService = class AuthService {
         }
         const accessToken = this.generateAccessToken(user);
         const refreshToken = await this.generateRefreshToken(user.id);
+        const profile = await this.subscriptionService.getProfilePayload(user.id);
         return {
             accessToken,
             refreshToken,
-            user: { id: user.id, email: user.email, name: user.name },
+            user: profile,
         };
     }
     async refresh(rawRefreshToken) {
@@ -148,11 +155,11 @@ let AuthService = class AuthService {
         });
     }
     async getProfile(userId) {
-        const user = await this.prisma.user.findUnique({
-            where: { id: userId },
-            select: { id: true, email: true, name: true, plan: true, createdAt: true },
-        });
-        return user;
+        const profile = await this.subscriptionService.getProfilePayload(userId);
+        if (!profile) {
+            throw new common_1.NotFoundException('User not found');
+        }
+        return profile;
     }
     generateAccessToken(user) {
         const payload = { sub: user.id, email: user.email };
@@ -197,6 +204,7 @@ exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         jwt_1.JwtService,
-        config_1.ConfigService])
+        config_1.ConfigService,
+        subscription_service_1.SubscriptionService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

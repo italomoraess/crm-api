@@ -3,6 +3,7 @@ import {
   ConflictException,
   UnauthorizedException,
   ForbiddenException,
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -11,6 +12,7 @@ import { randomBytes, createHash } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { SubscriptionService } from '../billing/subscription.service';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +20,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private subscriptionService: SubscriptionService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -31,21 +34,26 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(dto.password, 12);
 
+    const trialEndsAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+
     const user = await this.prisma.user.create({
       data: {
         email: dto.email,
         password: hashedPassword,
         name: dto.name,
+        trialEndsAt,
       },
     });
 
     const accessToken = this.generateAccessToken(user);
     const refreshToken = await this.generateRefreshToken(user.id);
 
+    const profile = await this.subscriptionService.getProfilePayload(user.id);
+
     return {
       accessToken,
       refreshToken,
-      user: { id: user.id, email: user.email, name: user.name },
+      user: profile!,
     };
   }
 
@@ -67,10 +75,12 @@ export class AuthService {
     const accessToken = this.generateAccessToken(user);
     const refreshToken = await this.generateRefreshToken(user.id);
 
+    const profile = await this.subscriptionService.getProfilePayload(user.id);
+
     return {
       accessToken,
       refreshToken,
-      user: { id: user.id, email: user.email, name: user.name },
+      user: profile!,
     };
   }
 
@@ -140,11 +150,11 @@ export class AuthService {
   }
 
   async getProfile(userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true, email: true, name: true, plan: true, createdAt: true },
-    });
-    return user;
+    const profile = await this.subscriptionService.getProfilePayload(userId);
+    if (!profile) {
+      throw new NotFoundException('User not found');
+    }
+    return profile;
   }
 
   // ─── Private helpers ────────────────────────────────────────────────

@@ -22,6 +22,7 @@ const login_dto_1 = require("./dto/login.dto");
 const refresh_token_dto_1 = require("./dto/refresh-token.dto");
 const public_decorator_1 = require("../common/decorators/public.decorator");
 const current_user_decorator_1 = require("../common/decorators/current-user.decorator");
+const skip_subscription_decorator_1 = require("../billing/decorators/skip-subscription.decorator");
 let AuthController = class AuthController {
     authService;
     constructor(authService) {
@@ -82,6 +83,7 @@ __decorate([
 ], AuthController.prototype, "refresh", null);
 __decorate([
     (0, swagger_1.ApiBearerAuth)(),
+    (0, skip_subscription_decorator_1.SkipSubscription)(),
     (0, common_1.Post)('logout'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, swagger_1.ApiOperation)({ summary: 'Logout current device (revokes refresh token)' }),
@@ -93,6 +95,7 @@ __decorate([
 ], AuthController.prototype, "logout", null);
 __decorate([
     (0, swagger_1.ApiBearerAuth)(),
+    (0, skip_subscription_decorator_1.SkipSubscription)(),
     (0, common_1.Post)('logout-all'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, swagger_1.ApiOperation)({ summary: 'Logout all devices (revokes all refresh tokens)' }),
@@ -103,6 +106,7 @@ __decorate([
 ], AuthController.prototype, "logoutAll", null);
 __decorate([
     (0, swagger_1.ApiBearerAuth)(),
+    (0, skip_subscription_decorator_1.SkipSubscription)(),
     (0, common_1.Get)('me'),
     (0, swagger_1.ApiOperation)({ summary: 'Get current user profile' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
