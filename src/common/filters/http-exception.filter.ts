@@ -28,6 +28,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
         message = (resp.message as string | string[]) || exception.message;
         error = (resp.error as string) || 'Error';
       }
+    } else {
+      console.error('[unhandled]', exception);
     }
 
     response.status(status).json({

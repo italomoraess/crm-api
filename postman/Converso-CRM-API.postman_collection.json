@@ -1,0 +1,524 @@
+{
+  "info": {
+    "name": "Converso CRM API",
+    "description": "API NestJS do CRM. Respostas seguem o envelope `{ \"data\": ..., \"message\": \"Success\" }`.\n\nApós **Login** ou **Register**, os tokens são salvos nas variáveis da coleção.\n\n**Webhook Stripe:** não dá para simular assinatura real pelo Postman sem o header `Stripe-Signature`; use Stripe CLI ou o dashboard.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "leadId", "value": "00000000-0000-4000-8000-000000000001" },
+    { "key": "categoryId", "value": "00000000-0000-4000-8000-000000000002" },
+    { "key": "catalogCategoryId", "value": "00000000-0000-4000-8000-000000000003" },
+    { "key": "productId", "value": "00000000-0000-4000-8000-000000000004" },
+    { "key": "appointmentId", "value": "00000000-0000-4000-8000-000000000005" },
+    { "key": "transactionId", "value": "00000000-0000-4000-8000-000000000006" },
+    { "key": "financeCategoryId", "value": "00000000-0000-4000-8000-000000000007" }
+  ],
+  "item": [
+    {
+      "name": "Auth (público)",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.data?.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', body.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', body.data.refreshToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"usuario@email.com\",\n  \"password\": \"Senha123\",\n  \"name\": \"João Silva\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register",
+            "description": "Senha: mín. 8 caracteres, 1 maiúscula e 1 número."
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.data?.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', body.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', body.data.refreshToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"usuario@email.com\",\n  \"password\": \"Senha123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Refresh token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/refresh"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth (Bearer)",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/auth/me"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/logout"
+          }
+        },
+        {
+          "name": "Logout all",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/auth/logout-all"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Billing",
+      "item": [
+        {
+          "name": "Checkout session",
+          "auth": {
+            "type": "bearer",
+            "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/billing/checkout-session",
+            "description": "Retorna `{ \"url\": \"https://checkout.stripe.com/...\" }` dentro de `data`."
+          }
+        },
+        {
+          "name": "Webhook Stripe (referência)",
+          "request": {
+            "auth": "noauth",
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "stripe-signature", "value": "whsec_..." }
+            ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/billing/webhook",
+            "description": "O servidor valida o corpo bruto com o segredo. Use: `stripe listen --forward-to localhost:3000/billing/webhook`."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Leads",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Listar leads",
+          "request": { "method": "GET", "url": "{{baseUrl}}/leads" }
+        },
+        {
+          "name": "Obter lead",
+          "request": { "method": "GET", "url": "{{baseUrl}}/leads/{{leadId}}" }
+        },
+        {
+          "name": "Criar lead",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const id = body.data?.id;",
+                  "if (id) pm.collectionVariables.set('leadId', id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Maria Souza\",\n  \"phone\": \"11999998888\",\n  \"origin\": \"instagram\",\n  \"funnelStage\": \"novo\",\n  \"dealValue\": 1500\n}"
+            },
+            "url": "{{baseUrl}}/leads"
+          }
+        },
+        {
+          "name": "Atualizar lead",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Maria Souza Atualizada\",\n  \"observations\": \"Follow-up agendado\"\n}"
+            },
+            "url": "{{baseUrl}}/leads/{{leadId}}"
+          }
+        },
+        {
+          "name": "Atualizar estágio",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"funnelStage\": \"negociando\"\n}" },
+            "url": "{{baseUrl}}/leads/{{leadId}}/stage"
+          }
+        },
+        {
+          "name": "Excluir lead",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/leads/{{leadId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Appointments",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Listar",
+          "request": { "method": "GET", "url": "{{baseUrl}}/appointments" }
+        },
+        {
+          "name": "Próximos",
+          "request": { "method": "GET", "url": "{{baseUrl}}/appointments/upcoming" }
+        },
+        {
+          "name": "Por data",
+          "request": { "method": "GET", "url": "{{baseUrl}}/appointments/date/2026-04-15" }
+        },
+        {
+          "name": "Criar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const id = body.data?.id;",
+                  "if (id) pm.collectionVariables.set('appointmentId', id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Reunião com cliente\",\n  \"date\": \"2026-04-15\",\n  \"type\": \"reuniao\",\n  \"startTime\": \"09:00\",\n  \"endTime\": \"10:00\",\n  \"allDay\": false\n}"
+            },
+            "url": "{{baseUrl}}/appointments"
+          }
+        },
+        {
+          "name": "Atualizar",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Reunião remarcada\"\n}" },
+            "url": "{{baseUrl}}/appointments/{{appointmentId}}"
+          }
+        },
+        {
+          "name": "Marcar concluído",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/appointments/{{appointmentId}}/complete"
+          }
+        },
+        {
+          "name": "Excluir",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/appointments/{{appointmentId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Catálogo",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Listar categorias",
+          "request": { "method": "GET", "url": "{{baseUrl}}/catalog/categories" }
+        },
+        {
+          "name": "Criar categoria",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const id = body.data?.id;",
+                  "if (id) pm.collectionVariables.set('catalogCategoryId', id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Serviços\"\n}" },
+            "url": "{{baseUrl}}/catalog/categories"
+          }
+        },
+        {
+          "name": "Atualizar categoria",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Serviços premium\"\n}" },
+            "url": "{{baseUrl}}/catalog/categories/{{catalogCategoryId}}"
+          }
+        },
+        {
+          "name": "Excluir categoria",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/catalog/categories/{{catalogCategoryId}}" }
+        },
+        {
+          "name": "Listar produtos",
+          "request": { "method": "GET", "url": "{{baseUrl}}/catalog/products" }
+        },
+        {
+          "name": "Criar produto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const id = body.data?.id;",
+                  "if (id) pm.collectionVariables.set('productId', id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryId\": \"{{catalogCategoryId}}\",\n  \"name\": \"Consultoria\",\n  \"price\": 299.9,\n  \"durationDays\": 30\n}"
+            },
+            "url": "{{baseUrl}}/catalog/products"
+          }
+        },
+        {
+          "name": "Atualizar produto",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"price\": 349.9\n}" },
+            "url": "{{baseUrl}}/catalog/products/{{productId}}"
+          }
+        },
+        {
+          "name": "Excluir produto",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/catalog/products/{{productId}}" }
+        },
+        {
+          "name": "Vincular produto ao lead",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"startDate\": \"2026-04-01\"\n}"
+            },
+            "url": "{{baseUrl}}/leads/{{leadId}}/products"
+          }
+        },
+        {
+          "name": "Produtos do lead",
+          "request": { "method": "GET", "url": "{{baseUrl}}/leads/{{leadId}}/products" }
+        }
+      ]
+    },
+    {
+      "name": "Financeiro",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Listar categorias",
+          "request": { "method": "GET", "url": "{{baseUrl}}/finance/categories" }
+        },
+        {
+          "name": "Criar categoria",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const id = body.data?.id;",
+                  "if (id) pm.collectionVariables.set('financeCategoryId', id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Vendas\",\n  \"type\": \"entrada\",\n  \"color\": \"#22c55e\"\n}"
+            },
+            "url": "{{baseUrl}}/finance/categories"
+          }
+        },
+        {
+          "name": "Atualizar categoria",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Vendas online\"\n}" },
+            "url": "{{baseUrl}}/finance/categories/{{financeCategoryId}}"
+          }
+        },
+        {
+          "name": "Excluir categoria",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/finance/categories/{{financeCategoryId}}" }
+        },
+        {
+          "name": "Listar transações",
+          "request": { "method": "GET", "url": "{{baseUrl}}/finance/transactions" }
+        },
+        {
+          "name": "Criar transação",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const id = body.data?.id;",
+                  "if (id) pm.collectionVariables.set('transactionId', id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryId\": \"{{financeCategoryId}}\",\n  \"type\": \"entrada\",\n  \"amount\": 1500.5,\n  \"date\": \"2026-04-01\",\n  \"description\": \"Pagamento cliente\"\n}"
+            },
+            "url": "{{baseUrl}}/finance/transactions"
+          }
+        },
+        {
+          "name": "Atualizar transação",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": 1600\n}" },
+            "url": "{{baseUrl}}/finance/transactions/{{transactionId}}"
+          }
+        },
+        {
+          "name": "Excluir transação",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/finance/transactions/{{transactionId}}" }
+        },
+        {
+          "name": "Resumo",
+          "request": { "method": "GET", "url": "{{baseUrl}}/finance/summary" }
+        }
+      ]
+    },
+    {
+      "name": "Relatórios",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Summary",
+          "request": { "method": "GET", "url": "{{baseUrl}}/reports/summary" }
+        }
+      ]
+    },
+    {
+      "name": "Documentação",
+      "item": [
+        {
+          "name": "Swagger UI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/docs"
+          }
+        }
+      ]
+    }
+  ]
+}

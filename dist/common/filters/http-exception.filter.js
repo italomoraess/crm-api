@@ -27,6 +27,9 @@ let HttpExceptionFilter = class HttpExceptionFilter {
                 error = resp.error || 'Error';
             }
         }
+        else {
+            console.error('[unhandled]', exception);
+        }
         response.status(status).json({
             statusCode: status,
             message,
