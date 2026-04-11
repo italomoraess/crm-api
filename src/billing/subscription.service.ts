@@ -16,6 +16,8 @@ export type UserSubscriptionProfile = {
   trialEndsAt: Date;
   stripeSubscriptionStatus: string | null;
   hasAccess: boolean;
+  subscriptionCancelAtPeriodEnd: boolean;
+  subscriptionPeriodEnd: Date | null;
 };
 
 @Injectable()
@@ -43,6 +45,8 @@ export class SubscriptionService {
         plan: true,
         trialEndsAt: true,
         stripeSubscriptionStatus: true,
+        subscriptionCancelAtPeriodEnd: true,
+        subscriptionPeriodEnd: true,
       },
     });
     if (!user) return null;
@@ -54,6 +58,8 @@ export class SubscriptionService {
       trialEndsAt: user.trialEndsAt,
       stripeSubscriptionStatus: user.stripeSubscriptionStatus,
       hasAccess: this.computeHasAccess(user),
+      subscriptionCancelAtPeriodEnd: user.subscriptionCancelAtPeriodEnd,
+      subscriptionPeriodEnd: user.subscriptionPeriodEnd,
     };
   }
 

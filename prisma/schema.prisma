@@ -17,9 +17,11 @@ model User {
   createdAt                DateTime          @default(now()) @map("created_at")
   updatedAt                DateTime          @updatedAt @map("updated_at")
   trialEndsAt              DateTime          @map("trial_ends_at")
-  stripeCustomerId         String?           @map("stripe_customer_id")
-  stripeSubscriptionId     String?           @map("stripe_subscription_id")
-  stripeSubscriptionStatus String?           @map("stripe_subscription_status")
+  stripeCustomerId               String?   @map("stripe_customer_id")
+  stripeSubscriptionId           String?   @map("stripe_subscription_id")
+  stripeSubscriptionStatus       String?   @map("stripe_subscription_status")
+  subscriptionCancelAtPeriodEnd  Boolean   @default(false) @map("subscription_cancel_at_period_end")
+  subscriptionPeriodEnd          DateTime? @map("subscription_period_end")
   appointments             Appointment[]
   catalogCategories        CatalogCategory[]
   catalogProducts          CatalogProduct[]

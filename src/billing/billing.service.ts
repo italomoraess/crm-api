@@ -1,9 +1,18 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Plan } from '@prisma/client';
 import Stripe from 'stripe';
 import { PrismaService } from '../prisma/prisma.service';
 
 type StripeClient = InstanceType<typeof Stripe>;
+
+type StripeSubscriptionLike = {
+  id: string;
+  status: string;
+  cancel_at_period_end?: boolean | null;
+  current_period_end?: number;
+  metadata?: Record<string, string> | null;
+};
 
 @Injectable()
 export class BillingService {
@@ -82,6 +91,75 @@ export class BillingService {
     return { url: session.url };
   }
 
+  private stripeSubscriptionToUserData(sub: StripeSubscriptionLike) {
+    const isPro = sub.status === 'active' || sub.status === 'trialing';
+    const plan: Plan = isPro ? Plan.pro : Plan.free;
+    return {
+      stripeSubscriptionId: sub.id,
+      stripeSubscriptionStatus: sub.status,
+      plan,
+      subscriptionCancelAtPeriodEnd: isPro
+        ? Boolean(sub.cancel_at_period_end)
+        : false,
+      subscriptionPeriodEnd:
+        isPro && sub.current_period_end != null
+          ? new Date(sub.current_period_end * 1000)
+          : null,
+    };
+  }
+
+  async cancelSubscriptionAtPeriodEnd(userId: string): Promise<{
+    cancelAtPeriodEnd: boolean;
+    currentPeriodEnd: string;
+  }> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { stripeSubscriptionId: true },
+    });
+    if (!user?.stripeSubscriptionId) {
+      throw new BadRequestException('Nenhuma assinatura para cancelar.');
+    }
+    const sub = (await this.stripe.subscriptions.update(
+      user.stripeSubscriptionId,
+      { cancel_at_period_end: true },
+    )) as unknown as StripeSubscriptionLike;
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: this.stripeSubscriptionToUserData(sub),
+    });
+    const end = sub.current_period_end ?? 0;
+    return {
+      cancelAtPeriodEnd: true,
+      currentPeriodEnd: new Date(end * 1000).toISOString(),
+    };
+  }
+
+  async reactivateSubscription(userId: string): Promise<{
+    cancelAtPeriodEnd: boolean;
+    currentPeriodEnd: string;
+  }> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { stripeSubscriptionId: true },
+    });
+    if (!user?.stripeSubscriptionId) {
+      throw new BadRequestException('Nenhuma assinatura ativa.');
+    }
+    const sub = (await this.stripe.subscriptions.update(
+      user.stripeSubscriptionId,
+      { cancel_at_period_end: false },
+    )) as unknown as StripeSubscriptionLike;
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: this.stripeSubscriptionToUserData(sub),
+    });
+    const end = sub.current_period_end ?? 0;
+    return {
+      cancelAtPeriodEnd: false,
+      currentPeriodEnd: new Date(end * 1000).toISOString(),
+    };
+  }
+
   async handleStripeWebhook(rawBody: Buffer, signature: string | undefined) {
     const webhookSecret = this.configService.get<string>(
       'STRIPE_WEBHOOK_SECRET',
@@ -125,14 +203,14 @@ export class BillingService {
             ? session.customer
             : session.customer?.id;
         if (userId && customerId && subId) {
-          const sub = await this.stripe.subscriptions.retrieve(subId);
+          const sub = (await this.stripe.subscriptions.retrieve(
+            subId,
+          )) as unknown as StripeSubscriptionLike;
           await this.prisma.user.update({
             where: { id: userId },
             data: {
               stripeCustomerId: customerId,
-              stripeSubscriptionId: subId,
-              stripeSubscriptionStatus: sub.status,
-              plan: 'pro',
+              ...this.stripeSubscriptionToUserData(sub),
             },
           });
         }
@@ -140,30 +218,18 @@ export class BillingService {
       }
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted': {
-        const sub = event.data.object as {
-          id: string;
-          status: string;
-          metadata?: Record<string, string> | null;
-        };
+        const sub = event.data.object as unknown as StripeSubscriptionLike;
         const userId = sub.metadata?.userId;
-        const plan =
-          sub.status === 'active' || sub.status === 'trialing' ? 'pro' : 'free';
+        const data = this.stripeSubscriptionToUserData(sub);
         if (userId) {
           await this.prisma.user.update({
             where: { id: userId },
-            data: {
-              stripeSubscriptionId: sub.id,
-              stripeSubscriptionStatus: sub.status,
-              plan,
-            },
+            data,
           });
         } else {
           await this.prisma.user.updateMany({
             where: { stripeSubscriptionId: sub.id },
-            data: {
-              stripeSubscriptionStatus: sub.status,
-              plan,
-            },
+            data,
           });
         }
         break;

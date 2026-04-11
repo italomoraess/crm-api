@@ -29,6 +29,22 @@ export class BillingController {
     return this.billingService.createCheckoutSession(user.userId);
   }
 
+  @ApiBearerAuth()
+  @SkipSubscription()
+  @Post('cancel-subscription')
+  @ApiOperation({ summary: 'Agenda cancelamento da assinatura ao fim do período pago' })
+  async cancelSubscription(@CurrentUser() user: { userId: string }) {
+    return this.billingService.cancelSubscriptionAtPeriodEnd(user.userId);
+  }
+
+  @ApiBearerAuth()
+  @SkipSubscription()
+  @Post('reactivate-subscription')
+  @ApiOperation({ summary: 'Revoga cancelamento agendado (mantém assinatura)' })
+  async reactivateSubscription(@CurrentUser() user: { userId: string }) {
+    return this.billingService.reactivateSubscription(user.userId);
+  }
+
   @Public()
   @SkipThrottle()
   @Post('webhook')
