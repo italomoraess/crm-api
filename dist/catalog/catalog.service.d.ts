@@ -41,14 +41,17 @@ export declare class CatalogService {
             id: string;
         };
     } & {
+        description: string | null;
         name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
+        status: import("@prisma/client").$Enums.ServiceStatus;
         categoryId: string;
         price: import("@prisma/client/runtime/library").Decimal;
         durationDays: number | null;
+        duration: string | null;
     })[]>;
     createProduct(userId: string, dto: CreateProductDto): Promise<{
         category: {
@@ -56,14 +59,17 @@ export declare class CatalogService {
             id: string;
         };
     } & {
+        description: string | null;
         name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
+        status: import("@prisma/client").$Enums.ServiceStatus;
         categoryId: string;
         price: import("@prisma/client/runtime/library").Decimal;
         durationDays: number | null;
+        duration: string | null;
     }>;
     updateProduct(userId: string, id: string, dto: UpdateProductDto): Promise<{
         category: {
@@ -71,24 +77,30 @@ export declare class CatalogService {
             id: string;
         };
     } & {
+        description: string | null;
         name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
+        status: import("@prisma/client").$Enums.ServiceStatus;
         categoryId: string;
         price: import("@prisma/client/runtime/library").Decimal;
         durationDays: number | null;
+        duration: string | null;
     }>;
     removeProduct(userId: string, id: string): Promise<{
+        description: string | null;
         name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
+        status: import("@prisma/client").$Enums.ServiceStatus;
         categoryId: string;
         price: import("@prisma/client/runtime/library").Decimal;
         durationDays: number | null;
+        duration: string | null;
     }>;
     createLeadProduct(userId: string, leadId: string, dto: CreateLeadProductDto): Promise<{
         product: {
@@ -97,14 +109,17 @@ export declare class CatalogService {
                 id: string;
             };
         } & {
+            description: string | null;
             name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
             userId: string;
+            status: import("@prisma/client").$Enums.ServiceStatus;
             categoryId: string;
             price: import("@prisma/client/runtime/library").Decimal;
             durationDays: number | null;
+            duration: string | null;
         };
     } & {
         id: string;
@@ -121,14 +136,17 @@ export declare class CatalogService {
                 id: string;
             };
         } & {
+            description: string | null;
             name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
             userId: string;
+            status: import("@prisma/client").$Enums.ServiceStatus;
             categoryId: string;
             price: import("@prisma/client/runtime/library").Decimal;
             durationDays: number | null;
+            duration: string | null;
         };
     } & {
         id: string;

@@ -64,6 +64,9 @@ export class CatalogService {
         name: dto.name,
         price: dto.price,
         durationDays: dto.durationDays,
+        duration: dto.duration,
+        description: dto.description,
+        status: dto.status,
       },
       include: { category: { select: { id: true, name: true } } },
     });
@@ -80,6 +83,9 @@ export class CatalogService {
     if (dto.name !== undefined) data.name = dto.name;
     if (dto.price !== undefined) data.price = dto.price;
     if (dto.durationDays !== undefined) data.durationDays = dto.durationDays;
+    if (dto.duration !== undefined) data.duration = dto.duration;
+    if (dto.description !== undefined) data.description = dto.description;
+    if (dto.status !== undefined) data.status = dto.status;
     if (dto.categoryId !== undefined) data.categoryId = dto.categoryId;
 
     return this.prisma.catalogProduct.update({

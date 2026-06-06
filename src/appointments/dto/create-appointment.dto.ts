@@ -4,7 +4,9 @@ import {
   IsEnum,
   IsBoolean,
   IsDateString,
+  IsInt,
   Matches,
+  Min,
   IsUUID,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -37,6 +39,20 @@ export class CreateAppointmentDto {
     message: 'endTime must be in HH:mm format',
   })
   endTime?: string;
+
+  @ApiPropertyOptional({ example: 90, description: 'Duration in minutes (calendar block size)' })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  durationMinutes?: number;
+
+  @ApiPropertyOptional({
+    example: 'Fotografia',
+    description: 'Service category used to color the event in the calendar',
+  })
+  @IsOptional()
+  @IsString()
+  serviceCategory?: string;
 
   @ApiPropertyOptional({ example: false })
   @IsOptional()

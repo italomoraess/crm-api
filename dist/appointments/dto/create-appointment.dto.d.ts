@@ -5,6 +5,8 @@ export declare class CreateAppointmentDto {
     type?: AppointmentType;
     startTime?: string;
     endTime?: string;
+    durationMinutes?: number;
+    serviceCategory?: string;
     allDay?: boolean;
     leadId?: string;
     description?: string;

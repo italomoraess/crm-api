@@ -22,4 +22,10 @@ export class ReportsController {
   ) {
     return this.reportsService.getSummary(user.userId, from, to);
   }
+
+  @Get('dashboard')
+  @ApiOperation({ summary: 'KPIs + séries para o dashboard (mês corrente)' })
+  getDashboard(@CurrentUser() user: { userId: string }) {
+    return this.reportsService.getDashboard(user.userId);
+  }
 }

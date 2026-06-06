@@ -8,6 +8,12 @@ import { PrismaService } from '../prisma/prisma.service';
 
 const STRIPE_ACTIVE = new Set(['active', 'trialing']);
 
+export type UserCompanyProfile = {
+  id: string;
+  name: string;
+  role: string;
+};
+
 export type UserSubscriptionProfile = {
   id: string;
   email: string;
@@ -18,6 +24,10 @@ export type UserSubscriptionProfile = {
   hasAccess: boolean;
   subscriptionCancelAtPeriodEnd: boolean;
   subscriptionPeriodEnd: Date | null;
+  /** 'admin' se o usuário é owner/admin de uma empresa; senão 'autonomo'. */
+  role: 'admin' | 'autonomo';
+  /** Empresa em que é owner/admin (painel Empresa), ou null. */
+  company: UserCompanyProfile | null;
 };
 
 @Injectable()
@@ -50,6 +60,19 @@ export class SubscriptionService {
       },
     });
     if (!user) return null;
+
+    const adminMembership = await this.prisma.membership.findFirst({
+      where: { userId, role: { in: ['owner', 'admin'] } },
+      include: { company: { select: { id: true, name: true } } },
+    });
+    const company: UserCompanyProfile | null = adminMembership
+      ? {
+          id: adminMembership.company.id,
+          name: adminMembership.company.name,
+          role: adminMembership.role,
+        }
+      : null;
+
     return {
       id: user.id,
       email: user.email,
@@ -60,6 +83,8 @@ export class SubscriptionService {
       hasAccess: this.computeHasAccess(user),
       subscriptionCancelAtPeriodEnd: user.subscriptionCancelAtPeriodEnd,
       subscriptionPeriodEnd: user.subscriptionPeriodEnd,
+      role: company ? 'admin' : 'autonomo',
+      company,
     };
   }
 

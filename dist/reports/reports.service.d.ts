@@ -26,5 +26,23 @@ export declare class ReportsService {
             lostReason: string | null;
         }[];
     }>;
+    getDashboard(userId: string): Promise<{
+        kpis: {
+            receitaMes: number;
+            receitaMeta: number;
+            receitaDelta: number;
+            aReceber: number;
+            servicosAtivos: number;
+            negociosAbertos: number;
+            taxaConversao: number;
+            novosClientes: number;
+            agendaHoje: number;
+        };
+        receitaMeses: {
+            m: string;
+            v: number;
+        }[];
+        sparkReceita: number[];
+    }>;
     private getISOWeekKey;
 }

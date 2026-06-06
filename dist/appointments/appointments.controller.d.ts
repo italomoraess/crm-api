@@ -24,6 +24,8 @@ export declare class AppointmentsController {
         date: Date;
         startTime: string | null;
         endTime: string | null;
+        durationMinutes: number | null;
+        serviceCategory: string | null;
         allDay: boolean;
         leadId: string | null;
         color: string | null;
@@ -48,6 +50,8 @@ export declare class AppointmentsController {
         date: Date;
         startTime: string | null;
         endTime: string | null;
+        durationMinutes: number | null;
+        serviceCategory: string | null;
         allDay: boolean;
         leadId: string | null;
         color: string | null;
@@ -72,6 +76,8 @@ export declare class AppointmentsController {
         date: Date;
         startTime: string | null;
         endTime: string | null;
+        durationMinutes: number | null;
+        serviceCategory: string | null;
         allDay: boolean;
         leadId: string | null;
         color: string | null;
@@ -95,6 +101,8 @@ export declare class AppointmentsController {
         date: Date;
         startTime: string | null;
         endTime: string | null;
+        durationMinutes: number | null;
+        serviceCategory: string | null;
         allDay: boolean;
         leadId: string | null;
         color: string | null;
@@ -118,6 +126,8 @@ export declare class AppointmentsController {
         date: Date;
         startTime: string | null;
         endTime: string | null;
+        durationMinutes: number | null;
+        serviceCategory: string | null;
         allDay: boolean;
         leadId: string | null;
         color: string | null;
@@ -136,6 +146,8 @@ export declare class AppointmentsController {
         date: Date;
         startTime: string | null;
         endTime: string | null;
+        durationMinutes: number | null;
+        serviceCategory: string | null;
         allDay: boolean;
         leadId: string | null;
         color: string | null;
@@ -154,6 +166,8 @@ export declare class AppointmentsController {
         date: Date;
         startTime: string | null;
         endTime: string | null;
+        durationMinutes: number | null;
+        serviceCategory: string | null;
         allDay: boolean;
         leadId: string | null;
         color: string | null;

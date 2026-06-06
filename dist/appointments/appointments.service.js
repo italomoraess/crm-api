@@ -88,6 +88,8 @@ let AppointmentsService = class AppointmentsService {
             type: dto.type,
             description: dto.description,
             color: dto.color,
+            durationMinutes: dto.durationMinutes,
+            serviceCategory: dto.serviceCategory,
             allDay: dto.allDay ?? false,
             startTime: dto.allDay ? null : dto.startTime,
             endTime: dto.allDay ? null : dto.endTime,

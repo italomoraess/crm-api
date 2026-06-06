@@ -25,6 +25,9 @@ let ReportsController = class ReportsController {
     getSummary(user, from, to) {
         return this.reportsService.getSummary(user.userId, from, to);
     }
+    getDashboard(user) {
+        return this.reportsService.getDashboard(user.userId);
+    }
 };
 exports.ReportsController = ReportsController;
 __decorate([
@@ -41,6 +44,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", void 0)
 ], ReportsController.prototype, "getSummary", null);
+__decorate([
+    (0, common_1.Get)('dashboard'),
+    (0, swagger_1.ApiOperation)({ summary: 'KPIs + séries para o dashboard (mês corrente)' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ReportsController.prototype, "getDashboard", null);
 exports.ReportsController = ReportsController = __decorate([
     (0, swagger_1.ApiTags)('Reports'),
     (0, swagger_1.ApiBearerAuth)(),

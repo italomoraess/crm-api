@@ -12,11 +12,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateProductDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
+const client_1 = require("@prisma/client");
 class CreateProductDto {
     categoryId;
     name;
     price;
     durationDays;
+    duration;
+    description;
+    status;
 }
 exports.CreateProductDto = CreateProductDto;
 __decorate([
@@ -42,4 +46,25 @@ __decorate([
     (0, class_validator_1.Min)(1),
     __metadata("design:type", Number)
 ], CreateProductDto.prototype, "durationDays", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        example: '1h30',
+        description: 'Free-text duration shown in the UI (e.g. "1h", "1h30", "3h")',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateProductDto.prototype, "duration", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Visita técnica, diagnóstico e troca de pontos.' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateProductDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ enum: client_1.ServiceStatus, example: 'ativo' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(client_1.ServiceStatus),
+    __metadata("design:type", String)
+], CreateProductDto.prototype, "status", void 0);
 //# sourceMappingURL=create-product.dto.js.map

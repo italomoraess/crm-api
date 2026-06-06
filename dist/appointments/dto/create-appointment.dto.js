@@ -19,6 +19,8 @@ class CreateAppointmentDto {
     type;
     startTime;
     endTime;
+    durationMinutes;
+    serviceCategory;
     allDay;
     leadId;
     description;
@@ -57,6 +59,22 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], CreateAppointmentDto.prototype, "endTime", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 90, description: 'Duration in minutes (calendar block size)' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    __metadata("design:type", Number)
+], CreateAppointmentDto.prototype, "durationMinutes", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        example: 'Fotografia',
+        description: 'Service category used to color the event in the calendar',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateAppointmentDto.prototype, "serviceCategory", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: false }),
     (0, class_validator_1.IsOptional)(),

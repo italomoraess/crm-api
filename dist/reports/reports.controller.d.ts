@@ -28,4 +28,24 @@ export declare class ReportsController {
             lostReason: string | null;
         }[];
     }>;
+    getDashboard(user: {
+        userId: string;
+    }): Promise<{
+        kpis: {
+            receitaMes: number;
+            receitaMeta: number;
+            receitaDelta: number;
+            aReceber: number;
+            servicosAtivos: number;
+            negociosAbertos: number;
+            taxaConversao: number;
+            novosClientes: number;
+            agendaHoje: number;
+        };
+        receitaMeses: {
+            m: string;
+            v: number;
+        }[];
+        sparkReceita: number[];
+    }>;
 }

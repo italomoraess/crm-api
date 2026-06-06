@@ -27,6 +27,7 @@ model User {
   catalogProducts          CatalogProduct[]
   financeCategories        FinanceCategory[]
   leads                    Lead[]
+  memberships              Membership[]
   refreshTokens            RefreshToken[]
   transactions             Transaction[]
 
@@ -81,6 +82,8 @@ model Appointment {
   date        DateTime        @db.Date
   startTime   String?         @map("start_time")
   endTime     String?         @map("end_time")
+  durationMinutes Int?        @map("duration_minutes")
+  serviceCategory String?     @map("service_category")
   allDay      Boolean         @default(false) @map("all_day")
   color       String?
   completed   Boolean         @default(false)
@@ -110,6 +113,9 @@ model CatalogProduct {
   name         String
   price        Decimal         @db.Decimal(10, 2)
   durationDays Int?            @map("duration_days")
+  duration     String?
+  description  String?
+  status       ServiceStatus   @default(ativo)
   createdAt    DateTime        @default(now()) @map("created_at")
   updatedAt    DateTime        @updatedAt @map("updated_at")
   category     CatalogCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
@@ -130,6 +136,41 @@ model LeadProduct {
   product   CatalogProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@map("lead_products")
+}
+
+/// Empresa que agrupa vários autônomos (painel Admin do layout Converso).
+model Company {
+  id          String       @id @default(uuid())
+  name        String
+  plan        CompanyPlan  @default(empresa)
+  monthlyGoal Decimal?     @map("monthly_goal") @db.Decimal(12, 2)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  memberships Membership[]
+
+  @@map("companies")
+}
+
+/// Vínculo de um autônomo (User) a uma Company. Enquanto o convite está pendente
+/// e o profissional ainda não tem conta, userId é null e usamos invitedName/Email.
+model Membership {
+  id           String       @id @default(uuid())
+  companyId    String       @map("company_id")
+  userId       String?      @map("user_id")
+  invitedName  String?      @map("invited_name")
+  invitedEmail String?      @map("invited_email")
+  role         CompanyRole  @default(member)
+  area         String?
+  status       MemberStatus @default(pendente)
+  joinedAt     DateTime?    @map("joined_at")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+  company      Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([companyId, userId])
+  @@index([companyId])
+  @@map("memberships")
 }
 
 model FinanceCategory {
@@ -178,6 +219,7 @@ enum LeadOrigin {
 enum FunnelStage {
   novo
   contatado
+  proposta
   negociando
   fechado
   perdido
@@ -189,6 +231,33 @@ enum AppointmentType {
   reuniao
   retorno
   outro
+}
+
+/// Status de um serviço do catálogo no layout (Serviços).
+enum ServiceStatus {
+  ativo
+  pausado
+  rascunho
+}
+
+enum CompanyPlan {
+  free
+  pro
+  empresa
+}
+
+/// Papel do autônomo dentro da empresa. owner/admin acessam o painel Empresa.
+enum CompanyRole {
+  owner
+  admin
+  member
+}
+
+/// Status do vínculo (espelha STATUS_TEAM do layout).
+enum MemberStatus {
+  ativo
+  pendente
+  inativo
 }
 
 enum TransactionType {
