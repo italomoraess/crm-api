@@ -18,4 +18,9 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   name?: string;
+
+  @ApiPropertyOptional({ example: '(11) 98765-4321' })
+  @IsOptional()
+  @IsString()
+  phone?: string;
 }

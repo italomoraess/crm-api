@@ -75,6 +75,7 @@ let AuthService = class AuthService {
                 email: dto.email,
                 password: hashedPassword,
                 name: dto.name,
+                phone: dto.phone,
                 trialEndsAt,
             },
         });
@@ -155,6 +156,21 @@ let AuthService = class AuthService {
         });
     }
     async getProfile(userId) {
+        const profile = await this.subscriptionService.getProfilePayload(userId);
+        if (!profile) {
+            throw new common_1.NotFoundException('User not found');
+        }
+        return profile;
+    }
+    async updateProfile(userId, dto) {
+        await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+                ...(dto.name !== undefined ? { name: dto.name } : {}),
+                ...(dto.phone !== undefined ? { phone: dto.phone } : {}),
+                ...(dto.city !== undefined ? { city: dto.city } : {}),
+            },
+        });
         const profile = await this.subscriptionService.getProfilePayload(userId);
         if (!profile) {
             throw new common_1.NotFoundException('User not found');

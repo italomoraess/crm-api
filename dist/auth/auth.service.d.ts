@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { SubscriptionService } from '../billing/subscription.service';
 export declare class AuthService {
     private prisma;
@@ -27,6 +28,7 @@ export declare class AuthService {
     logout(userId: string, rawRefreshToken: string): Promise<void>;
     logoutAll(userId: string): Promise<void>;
     getProfile(userId: string): Promise<import("../billing/subscription.service").UserSubscriptionProfile>;
+    updateProfile(userId: string, dto: UpdateProfileDto): Promise<import("../billing/subscription.service").UserSubscriptionProfile>;
     private generateAccessToken;
     private generateRefreshToken;
     private hashToken;

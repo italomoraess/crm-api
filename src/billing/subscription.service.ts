@@ -18,6 +18,8 @@ export type UserSubscriptionProfile = {
   id: string;
   email: string;
   name: string | null;
+  phone: string | null;
+  city: string | null;
   plan: string;
   trialEndsAt: Date;
   stripeSubscriptionStatus: string | null;
@@ -52,6 +54,8 @@ export class SubscriptionService {
         id: true,
         email: true,
         name: true,
+        phone: true,
+        city: true,
         plan: true,
         trialEndsAt: true,
         stripeSubscriptionStatus: true,
@@ -77,6 +81,8 @@ export class SubscriptionService {
       id: user.id,
       email: user.email,
       name: user.name,
+      phone: user.phone,
+      city: user.city,
       plan: user.plan,
       trialEndsAt: user.trialEndsAt,
       stripeSubscriptionStatus: user.stripeSubscriptionStatus,

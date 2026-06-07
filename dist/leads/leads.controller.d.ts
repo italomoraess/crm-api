@@ -11,11 +11,11 @@ export declare class LeadsController {
     }, query: QueryLeadsDto): Promise<{
         email: string | null;
         name: string;
+        phone: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        phone: string;
         cpfCnpj: string | null;
         origin: import("@prisma/client").$Enums.LeadOrigin;
         location: string | null;
@@ -35,11 +35,11 @@ export declare class LeadsController {
     } & {
         email: string | null;
         name: string;
+        phone: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        phone: string;
         cpfCnpj: string | null;
         origin: import("@prisma/client").$Enums.LeadOrigin;
         location: string | null;
@@ -55,11 +55,11 @@ export declare class LeadsController {
     }, dto: CreateLeadDto): Promise<{
         email: string | null;
         name: string;
+        phone: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        phone: string;
         cpfCnpj: string | null;
         origin: import("@prisma/client").$Enums.LeadOrigin;
         location: string | null;
@@ -75,11 +75,11 @@ export declare class LeadsController {
     }, id: string, dto: UpdateLeadDto): Promise<{
         email: string | null;
         name: string;
+        phone: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        phone: string;
         cpfCnpj: string | null;
         origin: import("@prisma/client").$Enums.LeadOrigin;
         location: string | null;
@@ -95,11 +95,11 @@ export declare class LeadsController {
     }, id: string, dto: UpdateStageDto): Promise<{
         email: string | null;
         name: string;
+        phone: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        phone: string;
         cpfCnpj: string | null;
         origin: import("@prisma/client").$Enums.LeadOrigin;
         location: string | null;
@@ -115,11 +115,11 @@ export declare class LeadsController {
     }, id: string): Promise<{
         email: string | null;
         name: string;
+        phone: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        phone: string;
         cpfCnpj: string | null;
         origin: import("@prisma/client").$Enums.LeadOrigin;
         location: string | null;

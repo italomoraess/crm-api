@@ -13,6 +13,8 @@ model User {
   email                    String            @unique
   password                 String
   name                     String?
+  phone                    String?
+  city                     String?
   plan                     Plan              @default(free)
   createdAt                DateTime          @default(now()) @map("created_at")
   updatedAt                DateTime          @updatedAt @map("updated_at")

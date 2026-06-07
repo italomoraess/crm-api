@@ -12,6 +12,7 @@ import { randomBytes, createHash } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { SubscriptionService } from '../billing/subscription.service';
 
 @Injectable()
@@ -41,6 +42,7 @@ export class AuthService {
         email: dto.email,
         password: hashedPassword,
         name: dto.name,
+        phone: dto.phone,
         trialEndsAt,
       },
     });
@@ -150,6 +152,22 @@ export class AuthService {
   }
 
   async getProfile(userId: string) {
+    const profile = await this.subscriptionService.getProfilePayload(userId);
+    if (!profile) {
+      throw new NotFoundException('User not found');
+    }
+    return profile;
+  }
+
+  async updateProfile(userId: string, dto: UpdateProfileDto) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(dto.name !== undefined ? { name: dto.name } : {}),
+        ...(dto.phone !== undefined ? { phone: dto.phone } : {}),
+        ...(dto.city !== undefined ? { city: dto.city } : {}),
+      },
+    });
     const profile = await this.subscriptionService.getProfilePayload(userId);
     if (!profile) {
       throw new NotFoundException('User not found');

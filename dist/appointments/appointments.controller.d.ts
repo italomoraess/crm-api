@@ -10,8 +10,8 @@ export declare class AppointmentsController {
     }, query: QueryAppointmentsDto): Promise<({
         lead: {
             name: string;
-            id: string;
             phone: string;
+            id: string;
         } | null;
     } & {
         type: import("@prisma/client").$Enums.AppointmentType;
@@ -36,8 +36,8 @@ export declare class AppointmentsController {
     }): Promise<({
         lead: {
             name: string;
-            id: string;
             phone: string;
+            id: string;
         } | null;
     } & {
         type: import("@prisma/client").$Enums.AppointmentType;
@@ -62,8 +62,8 @@ export declare class AppointmentsController {
     }, date: string): Promise<({
         lead: {
             name: string;
-            id: string;
             phone: string;
+            id: string;
         } | null;
     } & {
         type: import("@prisma/client").$Enums.AppointmentType;

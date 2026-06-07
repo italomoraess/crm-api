@@ -16,6 +16,7 @@ class RegisterDto {
     email;
     password;
     name;
+    phone;
 }
 exports.RegisterDto = RegisterDto;
 __decorate([
@@ -38,4 +39,10 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: '(11) 98765-4321' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RegisterDto.prototype, "phone", void 0);
 //# sourceMappingURL=register.dto.js.map

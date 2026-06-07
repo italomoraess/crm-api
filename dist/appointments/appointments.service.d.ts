@@ -8,8 +8,8 @@ export declare class AppointmentsService {
     findAll(userId: string, query: QueryAppointmentsDto): Promise<({
         lead: {
             name: string;
-            id: string;
             phone: string;
+            id: string;
         } | null;
     } & {
         type: import("@prisma/client").$Enums.AppointmentType;
@@ -32,8 +32,8 @@ export declare class AppointmentsService {
     findByDate(userId: string, dateStr: string): Promise<({
         lead: {
             name: string;
-            id: string;
             phone: string;
+            id: string;
         } | null;
     } & {
         type: import("@prisma/client").$Enums.AppointmentType;
@@ -56,8 +56,8 @@ export declare class AppointmentsService {
     findUpcoming(userId: string): Promise<({
         lead: {
             name: string;
-            id: string;
             phone: string;
+            id: string;
         } | null;
     } & {
         type: import("@prisma/client").$Enums.AppointmentType;

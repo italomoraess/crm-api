@@ -20,6 +20,7 @@ const auth_service_1 = require("./auth.service");
 const register_dto_1 = require("./dto/register.dto");
 const login_dto_1 = require("./dto/login.dto");
 const refresh_token_dto_1 = require("./dto/refresh-token.dto");
+const update_profile_dto_1 = require("./dto/update-profile.dto");
 const public_decorator_1 = require("../common/decorators/public.decorator");
 const current_user_decorator_1 = require("../common/decorators/current-user.decorator");
 const skip_subscription_decorator_1 = require("../billing/decorators/skip-subscription.decorator");
@@ -47,6 +48,9 @@ let AuthController = class AuthController {
     }
     async me(user) {
         return this.authService.getProfile(user.userId);
+    }
+    async updateMe(user, dto) {
+        return this.authService.updateProfile(user.userId, dto);
     }
 };
 exports.AuthController = AuthController;
@@ -114,6 +118,17 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "me", null);
+__decorate([
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, skip_subscription_decorator_1.SkipSubscription)(),
+    (0, common_1.Patch)('me'),
+    (0, swagger_1.ApiOperation)({ summary: 'Update current user profile (name, phone, city)' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, update_profile_dto_1.UpdateProfileDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "updateMe", null);
 exports.AuthController = AuthController = __decorate([
     (0, swagger_1.ApiTags)('Auth'),
     (0, common_1.Controller)('auth'),
